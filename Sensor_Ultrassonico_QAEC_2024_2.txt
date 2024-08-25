@@ -1,0 +1,57 @@
+// Definições dos pinos
+const int trigPin = 9;   // Pino de Trigger do HC-SR04
+const int echoPin = 10;  // Pino de Echo do HC-SR04
+
+const int ledPins[] = {2, 3, 4};  // Pinos onde os LEDs estão conectados
+const int numLeds = 3;   // Número de LEDs
+
+void setup() {
+  Serial.begin(9600);
+
+  // Configura pinos dos LEDs como saídas
+  for (int i = 0; i < numLeds; i++) {
+    pinMode(ledPins[i], OUTPUT);
+  }
+
+  // Configura pinos do sensor ultrassônico
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+}
+
+void loop() {
+  // Envia um pulso de 10 microssegundos para o pino Trigger
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // Lê a duração do pulso no pino Echo
+  long duration = pulseIn(echoPin, HIGH);
+
+  // Calcula a distância em centímetros
+  float distance = (duration / 2.0) * 0.0344;
+
+  // Limita a distância máxima a 60 cm
+  distance = constrain(distance, 0, 60);
+
+  // Desliga todos os LEDs
+  for (int i = 0; i < numLeds; i++) {
+    digitalWrite(ledPins[i], LOW);
+  }
+
+  // Acende LEDs baseados na distância
+  int ledsToLight = map(distance, 20, 60, 0, numLeds);
+
+  for (int i = 0; i < ledsToLight; i++) {
+    digitalWrite(ledPins[i], HIGH);
+  }
+
+  // Imprime a distância no monitor serial
+  Serial.print("Distância: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+  // Aguarda 100 milissegundos antes de ler novamente
+  delay(100);
+}
